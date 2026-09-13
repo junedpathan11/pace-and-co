@@ -12,7 +12,6 @@ import {
   HeartIcon,
   BagIcon,
   MenuIcon,
-  CloseIcon,
 } from "@/components/ui/icons";
 import MobileMenu from "./MobileMenu";
 

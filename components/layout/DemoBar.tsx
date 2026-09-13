@@ -10,11 +10,14 @@ export default function DemoBar() {
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
+    let value = false;
     try {
-      setDismissed(window.localStorage.getItem(KEY) === "true");
+      value = window.localStorage.getItem(KEY) === "true";
     } catch {
-      setDismissed(false);
+      value = false;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDismissed(value);
   }, []);
 
   if (dismissed) return null;

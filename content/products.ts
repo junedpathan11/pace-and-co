@@ -27,7 +27,6 @@ const ALPHA_KID = ["3-4Y", "5-6Y", "7-8Y", "9-10Y", "11-12Y"];
 const SHOE_ADULT = ["6", "7", "8", "9", "10", "11", "12"];
 const SHOE_KID = ["10", "11", "12", "13", "1", "2"];
 const JEANS = ["28", "30", "32", "34", "36"];
-const ONE = ["One Size"];
 
 export const products: Product[] = [
   /* ============================ CLOTHING (14) ============================ */

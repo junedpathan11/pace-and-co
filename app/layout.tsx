@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { site } from "@/content/site";
 import Navbar from "@/components/layout/Navbar";
@@ -11,18 +11,26 @@ import CartDrawer from "@/components/cart/CartDrawer";
 import SearchOverlay from "@/components/search/SearchOverlay";
 import { LocalBusinessSchema } from "@/components/seo/JsonLd";
 
-const archivo = Archivo({
+// Self-hosted for reliable, network-independent builds and best performance.
+const archivo = localFont({
   variable: "--font-archivo",
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
   display: "swap",
+  src: [
+    { path: "./fonts/archivo-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/archivo-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/archivo-700.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/archivo-800.woff2", weight: "800", style: "normal" },
+  ],
 });
 
-const inter = Inter({
+const inter = localFont({
   variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
   display: "swap",
+  src: [
+    { path: "./fonts/inter-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/inter-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/inter-600.woff2", weight: "600", style: "normal" },
+  ],
 });
 
 const siteUrl = "https://pace-and-co.vercel.app";

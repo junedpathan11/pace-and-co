@@ -9,6 +9,10 @@ import { useEffect, useState } from "react";
  */
 export function useMounted(): boolean {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    // Intentional: flip to client-rendered after mount to gate persisted values.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
   return mounted;
 }

@@ -21,6 +21,7 @@ export default function SearchOverlay() {
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRecent(getRecentSearches());
       setQuery("");
       setActiveIndex(-1);
@@ -92,6 +93,7 @@ export default function SearchOverlay() {
             }}
             placeholder="Search products, brands, categories…"
             aria-label="Search"
+            role="combobox"
             aria-expanded={results.length > 0}
             aria-controls="search-results"
             aria-activedescendant={
