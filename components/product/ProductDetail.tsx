@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import type { Product } from "@/content/types";
-import { discountPercent, getVariant } from "@/content/products";
+import { discountPercent, formatSizeLabel, getVariant } from "@/content/products";
 import { Price } from "@/components/ui/Price";
 import { Rating } from "@/components/ui/Rating";
 import { ProductBadge } from "@/components/ui/Badge";
@@ -16,13 +16,6 @@ import { useMounted } from "@/lib/useMounted";
 import { uiStore } from "@/lib/ui";
 import { recentStore } from "@/lib/recentlyViewed";
 import { buildWhatsAppLink, productOrderMessage, formatINR } from "@/lib/whatsapp";
-
-function sizeLabel(product: Product, size: string): string {
-  if (!size) return "Size to be confirmed";
-  if (product.sizeType === "shoe") return `UK ${size}`;
-  if (!product.sizeType || size === "One Size") return "One Size";
-  return `Size ${size}`;
-}
 
 export default function ProductDetail({ product }: { product: Product }) {
   const mounted = useMounted();
@@ -82,7 +75,7 @@ export default function ProductDetail({ product }: { product: Product }) {
       image: product.images.main,
       size: size || "One Size",
       color,
-      sizeLabel: sizeLabel(product, size || "One Size"),
+      sizeLabel: formatSizeLabel(product, size || "One Size"),
       price: product.price,
       compareAtPrice: product.compareAtPrice,
       qty,
@@ -111,7 +104,7 @@ export default function ProductDetail({ product }: { product: Product }) {
   const waMessage = productOrderMessage({
     name: product.name,
     brand: product.brand,
-    sizeLabel: sizeLabel(product, needsSize ? size : size || "One Size"),
+    sizeLabel: formatSizeLabel(product, needsSize ? size : size || "One Size"),
     color,
     qty,
     price: product.price * qty,
@@ -257,7 +250,7 @@ export default function ProductDetail({ product }: { product: Product }) {
           {/* Stock status */}
           {selectedVariant && selectedStock === "low" && (
             <p className="mt-4 text-sm font-medium text-primary">
-              Only a few left in {size ? sizeLabel(product, size) : ""} · {color}
+              Only a few left in {size ? formatSizeLabel(product, size) : ""} · {color}
             </p>
           )}
           {selectedVariant && selectedStock === "out" && (

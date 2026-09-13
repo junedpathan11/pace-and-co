@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { buildWhatsAppLink, questionMessage } from "@/lib/whatsapp";
+import { isWeb3FormsConfigured, submitToWeb3Forms } from "@/lib/web3forms";
 import { WhatsAppIcon, CheckIcon } from "@/components/ui/icons";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 export default function ContactForm() {
-  const key = process.env.NEXT_PUBLIC_WEB3FORMS_KEY;
-  const configured = !!key && key !== "YOUR_ACCESS_KEY" && key !== "your_web3forms_access_key_here";
+  const configured = isWeb3FormsConfigured();
 
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -21,41 +21,23 @@ export default function ContactForm() {
 
     const form = e.currentTarget;
     const data = new FormData(form);
-    data.append("access_key", key as string);
-    data.append("subject", "New enquiry from Pace & Co. website");
+    const fields: Record<string, string> = {
+      subject: "New enquiry from Pace & Co. website",
+    };
+    data.forEach((value, name) => {
+      if (typeof value === "string") fields[name] = value;
+    });
 
-    try {
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: data,
-      });
-      const payload: unknown = await res.json().catch(() => null);
-      const succeeded =
-        res.ok &&
-        typeof payload === "object" &&
-        payload !== null &&
-        "success" in payload &&
-        payload.success === true;
-
-      if (!succeeded) {
-        const apiMessage =
-          typeof payload === "object" &&
-          payload !== null &&
-          "message" in payload &&
-          typeof payload.message === "string"
-            ? payload.message
-            : "Something went wrong sending your message.";
-        setStatus("error");
-        setErrorMsg(apiMessage);
-        return;
-      }
-
-      setStatus("success");
-      form.reset();
-    } catch {
+    // Shared client: success requires HTTP ok AND success === true.
+    const result = await submitToWeb3Forms(fields);
+    if (!result.ok) {
       setStatus("error");
-      setErrorMsg("Couldn't reach the server. Please try again.");
+      setErrorMsg(result.error);
+      return;
     }
+
+    setStatus("success");
+    form.reset();
   }
 
   if (status === "success") {

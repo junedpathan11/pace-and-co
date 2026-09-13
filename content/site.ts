@@ -22,6 +22,9 @@ export interface SiteConfig {
   demoLabel: string;
   announcement: string;
   freeDeliveryThreshold: number;
+  /** Flat standard-delivery fee applied below the free-delivery threshold. */
+  standardDeliveryFee: number;
+  standardDeliveryEta: string;
 }
 
 export const site: SiteConfig = {
@@ -53,4 +56,6 @@ export const site: SiteConfig = {
   demoLabel: "Concept demo website",
   announcement: "Free delivery above ₹2,999 · Free size exchange",
   freeDeliveryThreshold: 2999,
+  standardDeliveryFee: 99,
+  standardDeliveryEta: "3–6 business days",
 };

@@ -1012,3 +1012,15 @@ export function discountPercent(p: Product): number | null {
   if (!p.compareAtPrice || p.compareAtPrice <= p.price) return null;
   return Math.round(((p.compareAtPrice - p.price) / p.compareAtPrice) * 100);
 }
+
+/**
+ * Human label for a size, derived from the product's sizeType.
+ * Single source of truth so the product page, cart, checkout and invoice all
+ * describe the same variant identically.
+ */
+export function formatSizeLabel(p: Product, size: string): string {
+  if (!size) return "Size to be confirmed";
+  if (p.sizeType === "shoe") return `UK ${size}`;
+  if (!p.sizeType || size === "One Size") return "One Size";
+  return `Size ${size}`;
+}

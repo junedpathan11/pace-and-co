@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useWishlist, wishlistStore, type WishlistItem } from "@/lib/wishlist";
 import { cartStore } from "@/lib/cart";
 import { getProductById } from "@/content/lookup";
+import { formatSizeLabel } from "@/content/products";
 import { useMounted } from "@/lib/useMounted";
 import { Price } from "@/components/ui/Price";
 import { uiStore } from "@/lib/ui";
@@ -57,12 +58,8 @@ function WishlistCard({ item }: { item: WishlistItem }) {
   const [added, setAdded] = useState(false);
   const [error, setError] = useState("");
 
-  function sizeLabel(s: string): string {
-    if (!product?.sizeType) return "One Size";
-    if (product.sizeType === "shoe") return `UK ${s}`;
-    if (s === "One Size") return "One Size";
-    return `Size ${s}`;
-  }
+  const sizeLabel = (s: string) =>
+    product ? formatSizeLabel(product, s) : "One Size";
 
   function moveToCart() {
     if (!product) return;

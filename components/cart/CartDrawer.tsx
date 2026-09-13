@@ -167,7 +167,7 @@ export default function CartDrawer() {
                   View Bag
                 </Link>
                 <Link
-                  href="/cart"
+                  href="/checkout"
                   onClick={() => uiStore.closeCart()}
                   className="btn btn-primary w-full"
                 >
