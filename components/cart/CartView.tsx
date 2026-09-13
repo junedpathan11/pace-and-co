@@ -142,20 +142,28 @@ export default function CartView() {
             <span className="h-px flex-1 bg-border" />
           </div>
 
-          {/* Alternative: order over WhatsApp, unchanged behaviour */}
-          <details className="group mt-4">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wider text-ink hover:text-primary">
-              <span className="inline-flex items-center gap-2">
-                <WhatsAppIcon width={16} height={16} /> Order via WhatsApp
-              </span>
+          {/* Alternative: order over WhatsApp — still one click, as before */}
+          <a
+            href={buildWhatsAppLink(waMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-red mt-4 w-full"
+          >
+            <WhatsAppIcon width={18} height={18} /> Order via WhatsApp
+          </a>
+
+          {/* Optional extras that personalise the WhatsApp message. */}
+          <details className="group mt-3">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-medium text-muted hover:text-ink">
+              Add your name &amp; a delivery note
               <ChevronDown
                 width={16}
                 height={16}
-                className="transition-transform group-open:rotate-180"
+                className="shrink-0 transition-transform group-open:rotate-180"
               />
             </summary>
 
-            <div className="mt-3 space-y-3">
+            <div className="mt-2 space-y-3">
               <div>
                 <label htmlFor="cust-name" className="eyebrow mb-1.5 block">
                   Your name (optional)
@@ -183,14 +191,6 @@ export default function CartView() {
                   className="w-full resize-none rounded-card border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-ink focus-visible:ring-2 focus-visible:ring-primary"
                 />
               </div>
-              <a
-                href={buildWhatsAppLink(waMessage)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-red w-full"
-              >
-                <WhatsAppIcon width={18} height={18} /> Continue on WhatsApp
-              </a>
             </div>
           </details>
 

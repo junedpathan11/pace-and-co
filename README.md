@@ -41,10 +41,17 @@ gitignored and must never be committed.
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_WEB3FORMS_KEY` | [Web3Forms](https://web3forms.com) access key for the contact form. Leave as the placeholder to see the built-in "form not configured" guard state. |
+| `NEXT_PUBLIC_WEB3FORMS_KEY` | [Web3Forms](https://web3forms.com) access key, used by **both** the contact form and the checkout order notification. Leave as the placeholder to see the built-in "not configured" guard states. |
 
-The contact form only reports success on a real HTTP 200; on failure it shows an
-error plus a WhatsApp fallback. It never fakes a submission.
+Both the contact form and checkout only report success when the HTTP response
+is OK **and** the Web3Forms body contains `success: true` — an HTTP 200 carrying
+`success: false` is treated as a failure. On failure they show the API's error
+message plus a WhatsApp fallback, and checkout keeps the customer's form data
+and their bag. Neither ever fakes a submission.
+
+> Actual submission requires a real key in `.env.local`. Without one the app is
+> fully usable: checkout clearly states notifications are off, the demo order,
+> confirmation and invoice still work, and WhatsApp remains available.
 
 ## Project structure
 
@@ -59,6 +66,8 @@ components/
   shop/                  ShopClient + adaptive FilterControls
   product/               Gallery, ProductDetail, size guide, recommendations
   cart/  wishlist/       Cart drawer + full cart/wishlist views
+  checkout/              Checkout view, accessible fields, order summary
+  order/                 Confirmation view, printable invoice, order QR
   search/                Command-style search overlay
   ui/  seo/  providers/  Primitives, JSON-LD, global client shell
 content/
@@ -69,6 +78,10 @@ lib/
   cart.ts wishlist.ts    localStorage-backed stores (versioned keys)
   filters.ts facets.ts   URL-synced filtering + adaptive facet computation
   whatsapp.ts            wa.me deep-link builder + message templates
+  order.ts               Demo order model, ID generation, localStorage store
+  web3forms.ts           Shared submit + strict success handling
+  orderNotification.ts   Web3Forms order payload builder
+  checkoutValidation.ts  Field validation (email, Indian phone/pincode)
   search.ts ui.ts …      Search, UI overlays, focus trap, mount gate
 public/images/           Generated hero, category tiles, OG, product shots
 ```
@@ -84,6 +97,18 @@ public/images/           Generated hero, category tiles, OG, product shots
   footwear and accessories carry only their relevant extra fields.
 - **Cart identity is strict.** A cart line key is `productId + size + color`, so
   the same product in M/Black and L/White are two separate lines.
+- **localStorage is untrusted.** Every cart read is re-resolved against the
+  catalogue (`sanitizeCart`): unknown products are dropped, name/brand/image and
+  **price** always come from product data, and quantities are clamped. A tampered
+  or corrupted bag degrades gracefully instead of reaching checkout.
+- **One pricing function.** `cartTotals()` in `lib/cart.ts` is the single source
+  for subtotal / savings / delivery / total. The drawer, cart, checkout, order
+  snapshot, invoice, Web3Forms payload and WhatsApp message all read from it, so
+  the numbers cannot drift between screens.
+- **Orders are client-side snapshots.** Placing an order freezes the purchased
+  lines (name, brand, colour, size, qty, price) into a versioned localStorage
+  record, so an invoice keeps showing what was actually bought even if the
+  catalogue changes later. No database, no auth, no payment gateway.
 - **Adaptive filters.** The filter set changes with the product type in view —
   clothing shows size/fit/material, footwear shows UK shoe size, accessories hide
   size/fit/material entirely. All filter + sort state is mirrored to URL search
@@ -115,8 +140,37 @@ studio product shots and a warm-dawn urban lifestyle hero. Product files follow
 
 ## Routes
 
-`/` · `/shop` · `/shop/[category]` · `/product/[slug]` · `/cart` · `/wishlist` ·
-`/offers` · `/about` · `/contact` · custom `404`.
+`/` · `/shop` · `/shop/[category]` · `/product/[slug]` · `/cart` · `/checkout` ·
+`/order-success/[orderId]` · `/invoice/[orderId]` · `/wishlist` · `/offers` ·
+`/about` · `/contact` · custom `404`.
+
+Checkout is intentionally **not** in the navbar — it's reached from the cart,
+and the order/invoice routes are `noindex` since they're personal and local-only.
+
+## Demo checkout flow
+
+```
+Product → Add to cart → Cart → Checkout → Order confirmation → Invoice
+                          └──── or Order via WhatsApp (unchanged) ────┘
+```
+
+- **`/checkout`** — customer details + Indian delivery address with accessible
+  validation (`aria-invalid`, `aria-describedby`, `autocomplete`, visible errors,
+  ≥44px targets), a standard-delivery line and a sticky order summary. Payment is
+  **Cash on Delivery** or **confirm on WhatsApp** — there is no gateway and no
+  card data is ever collected.
+- **Placing an order** posts the details to Web3Forms, then creates a demo order
+  (`PC-YYYYMMDD-NNNN`) and invoice (`INV-PC-…`) and clears the bag. If the
+  notification fails, no order is created, the bag and form are preserved, and
+  WhatsApp is offered as a fallback.
+- **`/invoice/[orderId]`** — a print-friendly invoice with an **order-reference
+  QR code** (via `qrcode.react`). The QR encodes the order/invoice numbers,
+  amount and status so staff can identify the order; it is explicitly *not* a
+  payment code. "Print / Save as PDF" uses `window.print()` with a dedicated
+  `@media print` block that strips the navbar, footer and all buttons.
+
+> No payment is ever processed. Order status stays *Pending confirmation* —
+> the UI never claims money changed hands.
 
 ## SEO & accessibility
 
