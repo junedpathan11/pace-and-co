@@ -68,9 +68,6 @@ export const metadata: Metadata = {
     description: "Modern fashion and footwear built to run the city.",
     images: ["/images/og.jpg"],
   },
-  icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-  },
 };
 
 export default function RootLayout({
