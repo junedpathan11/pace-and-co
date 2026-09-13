@@ -10,6 +10,7 @@ import {
   type CartItem,
 } from "@/lib/cart";
 import { getProductById } from "@/content/lookup";
+import { formatSizeLabel } from "@/content/products";
 import { site } from "@/content/site";
 import { useMounted } from "@/lib/useMounted";
 import { formatINR, buildWhatsAppLink, cartOrderMessage } from "@/lib/whatsapp";
@@ -213,12 +214,8 @@ function CartLine({ item }: { item: CartItem }) {
     : [item.size];
   const availableColors = product ? product.colors.map((c) => c.name) : [item.color];
 
-  function sizeLabel(size: string): string {
-    if (!product?.sizeType) return "One Size";
-    if (product.sizeType === "shoe") return `UK ${size}`;
-    if (size === "One Size") return "One Size";
-    return `Size ${size}`;
-  }
+  const sizeLabel = (size: string) =>
+    product ? formatSizeLabel(product, size) : item.sizeLabel;
 
   function changeVariant(nextSize: string, nextColor: string) {
     cartStore.changeVariant(item.productId, item.size, item.color, {
