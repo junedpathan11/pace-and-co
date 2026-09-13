@@ -1,0 +1,363 @@
+@import "tailwindcss";
+
+/* =====================================================
+   DESIGN TOKENS — single source of truth (Section 2)
+   ===================================================== */
+:root {
+  /* Colors */
+  --color-bg: #f5f4f0; /* warm paper */
+  --color-surface: #ffffff;
+  --color-ink: #191919;
+  --color-muted: #6b6b66;
+  --color-primary: #d64045; /* racing red */
+  --color-primary-dark: #b8333a;
+  --color-grey: #e5e4e0;
+  --color-border: #e2e0da;
+
+  /* Radius language */
+  --radius-card: 16px;
+  --radius-chip: 999px;
+  --radius-img: 12px;
+
+  /* Animation */
+  --anim-fast: 150ms;
+  --anim-base: 250ms;
+  --anim-slow: 400ms;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Map tokens into Tailwind's theme so utilities like bg-bg, text-ink,
+   rounded-card, text-primary all resolve from the variables above. */
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-ink: var(--color-ink);
+  --color-muted: var(--color-muted);
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-grey: var(--color-grey);
+  --color-border: var(--color-border);
+
+  --radius-card: var(--radius-card);
+  --radius-chip: var(--radius-chip);
+  --radius-img: var(--radius-img);
+
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-inter);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-lift: var(--shadow-lift);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Prevent horizontal overflow on small screens */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* =====================================================
+   TYPOGRAPHY HELPERS
+   ===================================================== */
+.font-display {
+  font-family: var(--font-archivo), system-ui, sans-serif;
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-muted);
+  font-weight: 500;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.display-hero {
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  font-size: clamp(3rem, 9vw, 7.5rem);
+}
+
+.display-section {
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+}
+
+/* =====================================================
+   BUTTONS (Section 2)
+   ===================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-chip);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  padding: 14px 26px;
+  cursor: pointer;
+  transition: background-color var(--anim-base) ease-out,
+    color var(--anim-base) ease-out, border-color var(--anim-base) ease-out,
+    transform var(--anim-fast) ease-out;
+  min-height: 44px;
+  line-height: 1;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-ink);
+  color: #fff;
+  border: 1.5px solid var(--color-ink);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-red {
+  background: var(--color-primary);
+  color: #fff;
+  border: 1.5px solid var(--color-primary);
+}
+.btn-red:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-ink);
+  border: 1.5px solid var(--color-ink);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-ink);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border: 1.5px solid transparent;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-grey);
+}
+
+/* =====================================================
+   BADGES / CHIPS
+   ===================================================== */
+.badge-sale {
+  background: var(--color-primary);
+  color: #fff;
+  transform: rotate(-3deg);
+  border-radius: var(--radius-chip);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 5px 10px;
+  display: inline-block;
+}
+.badge-new {
+  background: var(--color-ink);
+  color: #fff;
+  border-radius: var(--radius-chip);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 5px 10px;
+  display: inline-block;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: var(--radius-chip);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 8px 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--anim-fast) ease-out;
+  min-height: 40px;
+  color: var(--color-ink);
+}
+.chip:hover:not(:disabled) {
+  border-color: var(--color-ink);
+}
+.chip[data-active="true"] {
+  background: var(--color-ink);
+  color: #fff;
+  border-color: var(--color-ink);
+}
+.chip:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* =====================================================
+   CARDS / SURFACES
+   ===================================================== */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* =====================================================
+   FOCUS / ACCESSIBILITY
+   ===================================================== */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =====================================================
+   ANIMATIONS
+   ===================================================== */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.reveal {
+  opacity: 0;
+}
+.reveal.is-visible {
+  animation: fadeUp var(--anim-slow) ease-out forwards;
+}
+
+@keyframes heartPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.heart-pop {
+  animation: heartPop var(--anim-base) ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.animate-slide-in-right {
+  animation: slideInRight var(--anim-base) ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-in {
+  animation: fadeIn var(--anim-base) ease-out;
+}
+
+/* Staggered hero entrance */
+.hero-line {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp var(--anim-slow) ease-out forwards;
+}
+
+/* Utility: hide scrollbar for horizontal scroll rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
