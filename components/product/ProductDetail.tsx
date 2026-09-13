@@ -18,6 +18,7 @@ import { recentStore } from "@/lib/recentlyViewed";
 import { buildWhatsAppLink, productOrderMessage, formatINR } from "@/lib/whatsapp";
 
 function sizeLabel(product: Product, size: string): string {
+  if (!size) return "Size to be confirmed";
   if (product.sizeType === "shoe") return `UK ${size}`;
   if (!product.sizeType || size === "One Size") return "One Size";
   return `Size ${size}`;
@@ -110,7 +111,7 @@ export default function ProductDetail({ product }: { product: Product }) {
   const waMessage = productOrderMessage({
     name: product.name,
     brand: product.brand,
-    sizeLabel: sizeLabel(product, size || "One Size"),
+    sizeLabel: sizeLabel(product, needsSize ? size : size || "One Size"),
     color,
     qty,
     price: product.price * qty,
