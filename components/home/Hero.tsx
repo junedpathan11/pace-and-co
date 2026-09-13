@@ -48,7 +48,7 @@ export default function Hero() {
             className="hero-line mt-8 flex flex-wrap gap-3"
             style={{ animationDelay: "300ms" }}
           >
-            <Link href="/shop?sort=newest" className="btn btn-red">
+            <Link href="/shop?new=true&sort=newest" className="btn btn-red">
               Shop New Arrivals
             </Link>
             <Link href="/shop/footwear" className="btn btn-secondary">

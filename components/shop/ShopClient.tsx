@@ -51,8 +51,10 @@ export default function ShopClient({
   const facetBase = useMemo(() => {
     let base = allProducts;
     if (effectiveType) base = base.filter((p) => p.productType === effectiveType);
+    if (filters.gender) base = base.filter((p) => p.gender === filters.gender);
+    if (filters.newOnly) base = base.filter((p) => p.badge === "new");
     return base;
-  }, [allProducts, effectiveType]);
+  }, [allProducts, effectiveType, filters.gender, filters.newOnly]);
   const facets = useMemo(() => computeFacets(facetBase), [facetBase]);
 
   // Text search applied first (from ?q)
@@ -154,6 +156,8 @@ export default function ShopClient({
         label: `₹${filters.minPrice ?? 0}–${filters.maxPrice ?? "∞"}`,
         onRemove: () => update({ minPrice: undefined, maxPrice: undefined }),
       });
+    if (filters.newOnly)
+      chips.push({ label: "New arrivals", onRemove: () => update({ newOnly: false }) });
     if (filters.saleOnly)
       chips.push({ label: "On sale", onRemove: () => update({ saleOnly: false }) });
     if (filters.inStockOnly)
@@ -166,7 +170,9 @@ export default function ShopClient({
       {/* Header */}
       <div className="mb-6">
         <p className="eyebrow">Shop</p>
-        <h1 className="display-section mt-2">{heading}</h1>
+        <h1 className="display-section mt-2">
+          {filters.newOnly ? "New arrivals" : filters.gender ? `${filters.gender}’s ${heading.toLowerCase()}` : heading}
+        </h1>
         {filters.q && (
           <p className="mt-2 text-sm text-muted">
             Results for “{filters.q}”

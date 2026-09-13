@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import localFont from "next/font/local";
 import "./globals.css";
 import { site } from "@/content/site";
@@ -82,7 +83,7 @@ export default function RootLayout({
         <LocalBusinessSchema />
         <StoreProvider>
           <DemoBar />
-          <Navbar />
+          <Suspense fallback={<div className="h-[77px] border-b border-border bg-surface" />}><Navbar /></Suspense>
           <SearchOverlay />
           <CartDrawer />
           <main className="flex-1">{children}</main>
