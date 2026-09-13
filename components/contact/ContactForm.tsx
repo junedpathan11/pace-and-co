@@ -8,7 +8,7 @@ type Status = "idle" | "submitting" | "success" | "error";
 
 export default function ContactForm() {
   const key = process.env.NEXT_PUBLIC_WEB3FORMS_KEY;
-  const configured = !!key && key !== "YOUR_ACCESS_KEY";
+  const configured = !!key && key !== "YOUR_ACCESS_KEY" && key !== "your_web3forms_access_key_here";
 
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -29,13 +29,29 @@ export default function ContactForm() {
         method: "POST",
         body: data,
       });
-      if (res.status === 200) {
-        setStatus("success");
-        form.reset();
-      } else {
+      const payload: unknown = await res.json().catch(() => null);
+      const succeeded =
+        res.ok &&
+        typeof payload === "object" &&
+        payload !== null &&
+        "success" in payload &&
+        payload.success === true;
+
+      if (!succeeded) {
+        const apiMessage =
+          typeof payload === "object" &&
+          payload !== null &&
+          "message" in payload &&
+          typeof payload.message === "string"
+            ? payload.message
+            : "Something went wrong sending your message.";
         setStatus("error");
-        setErrorMsg("Something went wrong sending your message.");
+        setErrorMsg(apiMessage);
+        return;
       }
+
+      setStatus("success");
+      form.reset();
     } catch {
       setStatus("error");
       setErrorMsg("Couldn't reach the server. Please try again.");
@@ -89,10 +105,27 @@ export default function ContactForm() {
           id="name"
           name="name"
           type="text"
+          autoComplete="name"
           required
           disabled={!configured}
-          className="w-full rounded-chip border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-ink disabled:opacity-60"
+          className="min-h-11 w-full rounded-chip border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-ink focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
         />
+      </div>
+      <div>
+        <label htmlFor="email" className="eyebrow mb-1.5 block">
+          Email
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          disabled={!configured}
+          aria-describedby="email-hint"
+          className="min-h-11 w-full rounded-chip border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-ink focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
+        />
+        <p id="email-hint" className="sr-only">Enter a valid email address so we can reply.</p>
       </div>
       <div>
         <label htmlFor="phone" className="eyebrow mb-1.5 block">
@@ -102,9 +135,10 @@ export default function ContactForm() {
           id="phone"
           name="phone"
           type="tel"
+          autoComplete="tel"
           required
           disabled={!configured}
-          className="w-full rounded-chip border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-ink disabled:opacity-60"
+          className="min-h-11 w-full rounded-chip border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-ink focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
         />
       </div>
       <div>
@@ -117,12 +151,12 @@ export default function ContactForm() {
           rows={4}
           required
           disabled={!configured}
-          className="w-full resize-none rounded-card border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-ink disabled:opacity-60"
+          className="min-h-11 w-full resize-none rounded-card border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-ink focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
         />
       </div>
 
       {status === "error" && (
-        <div className="rounded-card border border-primary/40 bg-primary/5 p-4 text-sm">
+        <div role="alert" aria-live="assertive" className="rounded-card border border-primary/40 bg-primary/5 p-4 text-sm">
           <p className="font-medium text-primary">{errorMsg}</p>
           <a
             href={buildWhatsAppLink(questionMessage())}

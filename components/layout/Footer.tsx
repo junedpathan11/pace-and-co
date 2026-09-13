@@ -3,7 +3,7 @@ import { site } from "@/content/site";
 import { buildWhatsAppLink, questionMessage } from "@/lib/whatsapp";
 
 const shopLinks = [
-  { label: "New Arrivals", href: "/shop?sort=newest" },
+  { label: "New Arrivals", href: "/shop?new=true&sort=newest" },
   { label: "Clothing", href: "/shop/clothing" },
   { label: "Footwear", href: "/shop/footwear" },
   { label: "Accessories", href: "/shop/accessories" },

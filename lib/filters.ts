@@ -20,6 +20,7 @@ export interface FilterState {
   minPrice?: number;
   maxPrice?: number;
   saleOnly: boolean;
+  newOnly: boolean;
   inStockOnly: boolean;
   sort: SortKey;
   q?: string;
@@ -33,19 +34,35 @@ export const emptyFilters: FilterState = {
   fits: [],
   materials: [],
   saleOnly: false,
+  newOnly: false,
   inStockOnly: false,
   sort: "featured",
 };
 
+const PRODUCT_TYPES: ProductType[] = ["clothing", "footwear", "accessories"];
+const GENDERS: Gender[] = ["men", "women", "kids", "unisex"];
+const SORT_KEYS: SortKey[] = ["featured", "newest", "price-asc", "price-desc", "best-selling"];
+
 export function parseFilters(params: URLSearchParams): FilterState {
-  const list = (k: string) =>
-    params.get(k) ? params.get(k)!.split(",").filter(Boolean) : [];
-  const num = (k: string) =>
-    params.get(k) ? Number(params.get(k)) : undefined;
+  const list = (key: string) =>
+    params.get(key)?.split(",").filter(Boolean) ?? [];
+  const num = (key: string) => {
+    const raw = params.get(key);
+    if (!raw) return undefined;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : undefined;
+  };
+  const requestedType = params.get("productType") ?? params.get("category");
+  const requestedGender = params.get("gender");
+  const requestedSort = params.get("sort");
 
   return {
-    productType: (params.get("productType") as ProductType) || undefined,
-    gender: (params.get("gender") as Gender) || undefined,
+    productType: PRODUCT_TYPES.includes(requestedType as ProductType)
+      ? (requestedType as ProductType)
+      : undefined,
+    gender: GENDERS.includes(requestedGender as Gender)
+      ? (requestedGender as Gender)
+      : undefined,
     brands: list("brand"),
     subcategories: list("subcategory"),
     sizes: list("size"),
@@ -55,8 +72,11 @@ export function parseFilters(params: URLSearchParams): FilterState {
     minPrice: num("minPrice"),
     maxPrice: num("maxPrice"),
     saleOnly: params.get("sale") === "true",
+    newOnly: params.get("new") === "true",
     inStockOnly: params.get("inStock") === "true",
-    sort: (params.get("sort") as SortKey) || "featured",
+    sort: SORT_KEYS.includes(requestedSort as SortKey)
+      ? (requestedSort as SortKey)
+      : "featured",
     q: params.get("q") || undefined,
   };
 }
@@ -74,6 +94,7 @@ export function serializeFilters(f: FilterState): URLSearchParams {
   if (f.minPrice != null) p.set("minPrice", String(f.minPrice));
   if (f.maxPrice != null) p.set("maxPrice", String(f.maxPrice));
   if (f.saleOnly) p.set("sale", "true");
+  if (f.newOnly) p.set("new", "true");
   if (f.inStockOnly) p.set("inStock", "true");
   if (f.sort && f.sort !== "featured") p.set("sort", f.sort);
   if (f.q) p.set("q", f.q);
@@ -93,7 +114,9 @@ export function applyFilters(
   let out = all.slice();
 
   if (type) out = out.filter((p) => p.productType === type);
-  if (f.gender) out = out.filter((p) => p.gender === f.gender || p.gender === "unisex");
+  // A gender destination is intentionally exact. Unisex products remain
+  // available from Shop/Accessories and via the explicit Unisex filter.
+  if (f.gender) out = out.filter((p) => p.gender === f.gender);
   if (f.brands.length) out = out.filter((p) => f.brands.includes(p.brand));
   if (f.subcategories.length)
     out = out.filter((p) => f.subcategories.includes(p.subcategory));
@@ -118,9 +141,9 @@ export function applyFilters(
   if (f.minPrice != null) out = out.filter((p) => p.price >= f.minPrice!);
   if (f.maxPrice != null) out = out.filter((p) => p.price <= f.maxPrice!);
   if (f.saleOnly) out = out.filter((p) => p.badge === "sale" || p.compareAtPrice);
+  if (f.newOnly) out = out.filter((p) => p.badge === "new");
   if (f.inStockOnly) out = out.filter(hasStock);
 
-  // Sort
   switch (f.sort) {
     case "newest":
       out.sort((a, b) => (b.badge === "new" ? 1 : 0) - (a.badge === "new" ? 1 : 0));
@@ -135,7 +158,6 @@ export function applyFilters(
       out.sort((a, b) => b.reviewCount - a.reviewCount);
       break;
     default:
-      // featured: sale + new first, then rating
       out.sort((a, b) => {
         const af = (a.badge ? 1 : 0) + a.rating / 10;
         const bf = (b.badge ? 1 : 0) + b.rating / 10;
@@ -145,7 +167,6 @@ export function applyFilters(
   return out;
 }
 
-/** Materials extracted for the clothing filter (deduped keywords). */
 export const materialOptions = ["Cotton", "Linen", "Polyester", "Fleece", "Denim", "Nylon"];
 export const fitOptions: Array<{ value: string; label: string }> = [
   { value: "regular", label: "Regular" },

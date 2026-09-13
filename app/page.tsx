@@ -30,7 +30,7 @@ export default function Home() {
         eyebrow="Just landed"
         title="New arrivals"
         products={newArrivals}
-        viewAllHref="/shop?sort=newest"
+        viewAllHref="/shop?new=true&sort=newest"
       />
       <GenderBlocks />
       <ProductRow
