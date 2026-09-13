@@ -6,15 +6,22 @@ import { useState } from "react";
 import {
   useCart,
   cartStore,
-  cartSubtotal,
-  cartSavings,
+  cartTotals,
   type CartItem,
 } from "@/lib/cart";
 import { getProductById } from "@/content/lookup";
+import { site } from "@/content/site";
 import { useMounted } from "@/lib/useMounted";
 import { formatINR, buildWhatsAppLink, cartOrderMessage } from "@/lib/whatsapp";
 import { Price } from "@/components/ui/Price";
-import { TrashIcon, MinusIcon, PlusIcon, WhatsAppIcon, BagIcon } from "@/components/ui/icons";
+import {
+  TrashIcon,
+  MinusIcon,
+  PlusIcon,
+  WhatsAppIcon,
+  BagIcon,
+  ChevronDown,
+} from "@/components/ui/icons";
 
 function sizeLabelFor(item: CartItem): string {
   return item.sizeLabel;
@@ -47,8 +54,7 @@ export default function CartView() {
     );
   }
 
-  const subtotal = cartSubtotal(cart);
-  const savings = cartSavings(cart);
+  const totals = cartTotals(cart);
 
   const waMessage = cartOrderMessage({
     customerName: name,
@@ -59,7 +65,7 @@ export default function CartView() {
       qty: i.qty,
       lineTotal: i.price * i.qty,
     })),
-    total: subtotal,
+    total: totals.total,
     deliveryNote: note,
   });
 
@@ -101,66 +107,96 @@ export default function CartView() {
             Order summary
           </h2>
           <dl className="mt-4 space-y-2.5 text-sm">
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-4">
               <dt className="text-muted">Subtotal</dt>
-              <dd className="tabular font-medium">{formatINR(subtotal)}</dd>
+              <dd className="tabular font-medium">{formatINR(totals.subtotal)}</dd>
             </div>
-            {savings > 0 && (
-              <div className="flex justify-between text-primary">
+            {totals.savings > 0 && (
+              <div className="flex justify-between gap-4 text-primary">
                 <dt>Total savings</dt>
-                <dd className="tabular font-medium">−{formatINR(savings)}</dd>
+                <dd className="tabular font-medium">−{formatINR(totals.savings)}</dd>
               </div>
             )}
-            <div className="flex justify-between">
+            <div className="flex justify-between gap-4">
               <dt className="text-muted">Delivery</dt>
-              <dd className="text-muted">Confirmed on WhatsApp</dd>
+              <dd className="tabular font-medium">
+                {totals.delivery === 0 ? "Free" : formatINR(totals.delivery)}
+              </dd>
             </div>
-            <div className="mt-2 flex justify-between border-t border-border pt-3 text-base">
+            <div className="mt-2 flex justify-between gap-4 border-t border-border pt-3 text-base">
               <dt className="font-semibold">Total</dt>
-              <dd className="tabular font-semibold">{formatINR(subtotal)}</dd>
+              <dd className="tabular font-semibold">{formatINR(totals.total)}</dd>
             </div>
           </dl>
 
-          <div className="mt-5 space-y-3">
-            <div>
-              <label htmlFor="cust-name" className="eyebrow mb-1.5 block">
-                Your name (optional)
-              </label>
-              <input
-                id="cust-name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Priya Sharma"
-                className="w-full rounded-chip border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-ink"
-              />
-            </div>
-            <div>
-              <label htmlFor="cust-note" className="eyebrow mb-1.5 block">
-                Delivery note (optional)
-              </label>
-              <textarea
-                id="cust-note"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={2}
-                placeholder="Address, landmark or pickup preference"
-                className="w-full resize-none rounded-card border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-ink"
-              />
-            </div>
+          {/* Primary ecommerce flow */}
+          <Link href="/checkout" className="btn btn-primary mt-5 w-full">
+            Checkout
+          </Link>
+
+          <div className="mt-4 flex items-center gap-3" aria-hidden>
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-muted">
+              or
+            </span>
+            <span className="h-px flex-1 bg-border" />
           </div>
 
-          <a
-            href={buildWhatsAppLink(waMessage)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-red mt-5 w-full"
-          >
-            <WhatsAppIcon width={18} height={18} /> Continue on WhatsApp
-          </a>
-          <p className="mt-3 text-center text-xs text-muted">
-            We&apos;ll confirm stock, total and delivery on WhatsApp. No payment
-            is taken on this site.
+          {/* Alternative: order over WhatsApp, unchanged behaviour */}
+          <details className="group mt-4">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wider text-ink hover:text-primary">
+              <span className="inline-flex items-center gap-2">
+                <WhatsAppIcon width={16} height={16} /> Order via WhatsApp
+              </span>
+              <ChevronDown
+                width={16}
+                height={16}
+                className="transition-transform group-open:rotate-180"
+              />
+            </summary>
+
+            <div className="mt-3 space-y-3">
+              <div>
+                <label htmlFor="cust-name" className="eyebrow mb-1.5 block">
+                  Your name (optional)
+                </label>
+                <input
+                  id="cust-name"
+                  type="text"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Priya Sharma"
+                  className="min-h-11 w-full rounded-chip border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-ink focus-visible:ring-2 focus-visible:ring-primary"
+                />
+              </div>
+              <div>
+                <label htmlFor="cust-note" className="eyebrow mb-1.5 block">
+                  Delivery note (optional)
+                </label>
+                <textarea
+                  id="cust-note"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={2}
+                  placeholder="Address, landmark or pickup preference"
+                  className="w-full resize-none rounded-card border border-border bg-surface px-4 py-2.5 text-sm outline-none focus:border-ink focus-visible:ring-2 focus-visible:ring-primary"
+                />
+              </div>
+              <a
+                href={buildWhatsAppLink(waMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-red w-full"
+              >
+                <WhatsAppIcon width={18} height={18} /> Continue on WhatsApp
+              </a>
+            </div>
+          </details>
+
+          <p className="mt-4 text-center text-xs text-muted">
+            No payment is taken on this site — {site.name} is a concept demo
+            store.
           </p>
         </div>
       </aside>

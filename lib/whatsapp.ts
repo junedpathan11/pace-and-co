@@ -74,3 +74,38 @@ export function cartOrderMessage(input: CartOrderInput): string {
 export function questionMessage(): string {
   return `Hi ${site.name}, I have a question.`;
 }
+
+export interface OrderMessageInput {
+  orderId: string;
+  customerName: string;
+  lines: CartLineInput[];
+  total: number;
+  address?: string;
+}
+
+/**
+ * WhatsApp fallback for a placed demo order — used when the Web3Forms
+ * notification fails, and encoded into the invoice QR. Carries the order
+ * reference so the store can match the message to the invoice.
+ */
+export function placedOrderMessage(input: OrderMessageInput): string {
+  const { orderId, customerName, lines, total, address } = input;
+  const parts: string[] = [];
+  parts.push(`Hi ${site.name}, I've placed an order on your website.`);
+  parts.push(`Order: ${orderId}`);
+  if (customerName.trim()) parts.push(`Name: ${customerName.trim()}`);
+  parts.push("");
+  lines.forEach((l) => {
+    parts.push(
+      `• ${l.name} — ${l.brand} — ${l.variant} × ${l.qty} — ${formatINR(
+        l.lineTotal
+      )}`
+    );
+  });
+  parts.push("");
+  parts.push(`Total: ${formatINR(total)}`);
+  if (address && address.trim()) parts.push(`Deliver to: ${address.trim()}`);
+  parts.push("");
+  parts.push("Please confirm my order.");
+  return parts.join("\n");
+}

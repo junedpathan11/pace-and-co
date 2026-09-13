@@ -361,3 +361,65 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* =====================================================
+   PRINT — invoice only
+   Chrome/Safari/Firefox: hide all app chrome (navbar, footer, demo bar,
+   WhatsApp FAB, drawers, toolbar buttons) and print the invoice document
+   full-bleed on A4. Anything marked .no-print is dropped.
+   ===================================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    overflow: visible !important;
+  }
+
+  /* App chrome never belongs on a printed invoice: hide every top-level
+     sibling of <main> (demo bar, navbar, search overlay, cart drawer, footer,
+     WhatsApp FAB) plus anything explicitly opted out. */
+  body > *:not(main),
+  .no-print {
+    display: none !important;
+  }
+
+  /* Layout wrappers: drop spacing/frames so the document fills the page. */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #invoice-document {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+  }
+
+  /* Keep table rows and the totals block from splitting across pages. */
+  #invoice-document table,
+  #invoice-document tr,
+  #invoice-document section,
+  #invoice-document figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Preserve the brand red / ink on paper where the browser allows it. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}
